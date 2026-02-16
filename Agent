@@ -1,0 +1,36 @@
+import os
+from langchain_openai import ChatOpenAI
+from langchain.agents import AgentType, initialize_agent, load_tools
+
+# 1. Setup - You'll need an API Key (OpenAI or Anthropic)
+os.environ["OPENAI_API_KEY"] = "your_key_here"
+
+# 2. Initialize the "Brain" (The LLM)
+llm = ChatOpenAI(model="gpt-4-turbo", temperature=0)
+
+# 3. Define the Tools - This makes it an 'Agent' instead of just a 'Chatbot'
+# We give it 'llm-math' so it can perform precise data calculations
+tools = load_tools(["llm-math"], llm=llm)
+
+# 4. Initialize the Agent
+# Zero-shot-react-description means it will 'Reason' then 'Act'
+agent = initialize_agent(
+    tools, 
+    llm, 
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
+    verbose=True
+)
+
+# 5. The Task (Data Analytics focused)
+query = """
+I have three marketing campaigns:
+Campaign A cost $500 and generated 20 leads.
+Campaign B cost $850 and generated 45 leads.
+Campaign C cost $1200 and generated 60 leads.
+
+Calculate the Cost Per Lead (CPL) for each and tell me 
+which campaign was the most cost-effective.
+"""
+
+print("Agent is thinking...")
+agent.run(query)
